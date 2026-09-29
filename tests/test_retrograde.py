@@ -1,5 +1,5 @@
 """Retrograde-Analyse: Fixpunkt-Propagation an kleinen, von Hand
-nachvollziehbaren Ausschnitten geprüft (nicht der volle 447.888-Stellungen-
+nachvollziehbaren Ausschnitten geprüft (nicht der volle 399.112-Stellungen-
 Sweep - das läuft in tests/test_claims.py separat und einmalig)."""
 
 from eg_chess import BLACK, WHITE, Position, legal_moves, square

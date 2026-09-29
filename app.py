@@ -1,5 +1,5 @@
 """Endspiel-Tablebase: König+Turm gegen König, vollständig vorab gelöst per
-Retrograde-Analyse (447.888 Stellungen, einmalig berechnet, siehe
+Retrograde-Analyse (399.112 Stellungen, einmalig berechnet, siehe
 tools/build_tablebase.py) - Vehikel-Wechsel zu einem echten Schach-Endspiel,
 im Unterschied zum Mini-Vier-Gewinnt-Vehikel der übrigen Linie.
 
@@ -36,7 +36,7 @@ st.markdown(
     **Vehikel-Wechsel:** statt Mini-Vier-Gewinnt diesmal ein echtes Schach-Endspiel – König und Turm gegen
     König, das klassische Beispiel für **Retrograde-Analyse** (Ken Thompsons erste vollständig berechnete
     Tablebase, 1986). Statt vorwärts zu suchen, wird **rückwärts von jeder Matt-/Patt-Stellung aus**
-    propagiert, bis jede der 447.888 legalen Stellungen einen exakten Matt-Abstand hat – dieselbe
+    propagiert, bis jede der 399.112 legalen Stellungen einen exakten Matt-Abstand hat – dieselbe
     Bellman-Rückwärtsrechnung wie in `value-iteration-demo` (Reinforcement-Learning-Linie), hier für ein
     Nullsummenspiel statt eines Erwartungswerts. Am Ende der Seite: die 📐 Mathematische Formulierung.
     """
@@ -139,9 +139,9 @@ st.plotly_chart(
             {
                 "type": "bar",
                 "x": ["Optimal (schnellstes Matt)", "Gewinnt noch, aber langsamer", "Verschenkt den Sieg (Remis!)"],
-                "y": [466, 1347, 187],
+                "y": [487, 1394, 119],
                 "marker": {"color": ["#2ca02c", "#ff7f0e", "#d62728"]},
-                "text": ["23,3 %", "67,4 %", "9,4 %"],
+                "text": ["24,4 %", "69,7 %", "6,0 %"],
                 "textposition": "outside",
             }
         ],
@@ -151,8 +151,8 @@ st.plotly_chart(
     key="heuristic_chart",
 )
 st.warning(
-    "**Ehrlicher Befund:** die Faustregel findet den schnellsten Weg nur in 23,3 % der Fälle - "
-    "und in 9,4 % der Fälle verschenkt sie den bewiesenen Sieg komplett (der Zug führt in eine "
+    "**Ehrlicher Befund:** die Faustregel findet den schnellsten Weg nur in 24,4 % der Fälle - "
+    "und in 6,0 % der Fälle verschenkt sie den bewiesenen Sieg komplett (der Zug führt in eine "
     "Remis-Stellung, weil der Turm dabei seine Kontrolle verliert). Königsabstand allein ist keine "
     "verlässliche Heuristik für dieses Endspiel - der Turm muss aktiv mitgedacht werden."
 )

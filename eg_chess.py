@@ -83,12 +83,18 @@ def rook_attacks(rook_sq: int | None, blockers: set[int]) -> set[int]:
 def is_legal_position(pos: Position) -> bool:
     """Grundlegende Aufstellungs-Legalität (keine Zug-Historie geprüft, nur
     ob die Stellung selbst überhaupt vorkommen könnte): Felder verschieden,
-    Turm nicht auf einem Königsfeld, Könige nicht benachbart."""
+    Turm nicht auf einem Königsfeld, Könige nicht benachbart, UND die Seite,
+    die NICHT am Zug ist, darf nicht im Schach stehen (sonst hätte sie ihren
+    letzten Zug illegal in ein Schach hinein gemacht - echter, vom User
+    gefundener Bug: der ursprüngliche "Lehrbuch-Start"-Preset hatte genau
+    diesen Fehler, Weiß am Zug bei bereits schachstehendem Schwarz)."""
     if pos.white_king == pos.black_king:
         return False
     if pos.white_rook is not None and pos.white_rook in (pos.white_king, pos.black_king):
         return False
     if kings_adjacent(pos.white_king, pos.black_king):
+        return False
+    if pos.side_to_move == WHITE and is_check(pos):
         return False
     return True
 

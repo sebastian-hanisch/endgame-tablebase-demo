@@ -6,7 +6,19 @@ from __future__ import annotations
 import plotly.graph_objects as go
 
 from eg_chess import file_of, rank_of
-from eg_constants import DARK_SQUARE, FILES, HIGHLIGHT_SQUARE, LIGHT_SQUARE, PIECE_SYMBOLS
+from eg_constants import DARK_SQUARE, FILES, HIGHLIGHT_SQUARE, LIGHT_SQUARE
+
+# Echter, vom User gefundener Fund: Schach-Unicode-Symbole (♔♖♚) allein - ohne
+# Hintergrundfarbe, ohne Kontrastfarbe im Text - waren auf dem karierten Brett
+# kaum zu erkennen (dieselbe dunkle Standard-Textfarbe für Weiß UND Schwarz,
+# nur die duenne Hohl-vs-Voll-Glyphenform unterschied sie). Fix: wie bei den
+# Connect4-Demos dieser Linie - eine farbige Kreisscheibe je Figur (klarer
+# Weiß/Schwarz-Kontrast) MIT einem fett beschrifteten Buchstaben obendrauf
+# (K/T), nicht nur ein duennes Unicode-Glyph.
+_PIECE_FILL = {"white": "#f7f3e8", "black": "#2b2b2b"}
+_PIECE_BORDER = {"white": "#2b2b2b", "black": "#f7f3e8"}
+_PIECE_LABEL_COLOUR = {"white": "#2b2b2b", "black": "#f7f3e8"}
+_PIECE_LABEL = {"king": "K", "rook": "T"}
 
 
 def board_figure(white_king: int, white_rook: int | None, black_king: int, highlight_squares: set[int] | None = None) -> go.Figure:
@@ -35,16 +47,31 @@ def board_figure(white_king: int, white_rook: int | None, black_king: int, highl
         )
     )
 
-    pieces = [("white_king", white_king), ("black_king", black_king)]
+    pieces = [("white", "king", white_king), ("black", "king", black_king)]
     if white_rook is not None:
-        pieces.append(("white_rook", white_rook))
+        pieces.append(("white", "rook", white_rook))
+
     fig.add_trace(
         go.Scatter(
-            x=[file_of(sq) for _, sq in pieces],
-            y=[rank_of(sq) for _, sq in pieces],
+            x=[file_of(sq) for _, _, sq in pieces],
+            y=[rank_of(sq) for _, _, sq in pieces],
+            mode="markers",
+            marker=dict(
+                size=38,
+                color=[_PIECE_FILL[side] for side, _, _ in pieces],
+                line=dict(width=3, color=[_PIECE_BORDER[side] for side, _, _ in pieces]),
+            ),
+            hoverinfo="skip",
+            showlegend=False,
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=[file_of(sq) for _, _, sq in pieces],
+            y=[rank_of(sq) for _, _, sq in pieces],
             mode="text",
-            text=[PIECE_SYMBOLS[name] for name, _ in pieces],
-            textfont=dict(size=34),
+            text=[_PIECE_LABEL[piece] for _, piece, _ in pieces],
+            textfont=dict(size=20, color=[_PIECE_LABEL_COLOUR[side] for side, _, _ in pieces]),
             hoverinfo="skip",
             showlegend=False,
         )

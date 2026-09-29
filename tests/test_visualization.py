@@ -23,7 +23,16 @@ def test_board_figure_has_64_squares():
 
 def test_board_figure_without_rook_still_renders():
     fig = board_figure(sq("a", 1), None, sq("h", 8))
-    assert len(fig.data[1].text) == 2  # nur die beiden Koenige
+    text_trace = next(t for t in fig.data if t.mode == "text")
+    assert len(text_trace.text) == 2  # nur die beiden Koenige
+
+
+def test_board_figure_with_rook_has_three_pieces():
+    fig = board_figure(sq("a", 1), sq("d", 4), sq("h", 8))
+    text_trace = next(t for t in fig.data if t.mode == "text")
+    assert len(text_trace.text) == 3
+    marker_trace = next(t for t in fig.data if t.mode == "markers" and len(t.x) == 3)
+    assert list(marker_trace.marker.color) == ["#f7f3e8", "#2b2b2b", "#f7f3e8"]  # weiss, schwarz, weiss
 
 
 def test_dtm_histogram_has_one_bar_per_dtm_value():

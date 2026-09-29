@@ -10,7 +10,7 @@ Schach-Endspiel – König und Turm gegen König (KTK), das klassische Beispiel 
 Bisher hat diese Linie immer VORWÄRTS gesucht (Minimax, Alpha-Beta, Bewertungsfunktion). Retrograde-Analyse
 dreht das um: ausgehend von jeder Matt-/Patt-Stellung wird der Wert **rückwärts** propagiert, bis jede
 erreichbare Stellung einen exakten Matt-Abstand (DTM, „distance to mate") hat. Für ein Endspiel mit nur
-3 Figuren ist das vollständig durchführbar – 447.888 legale Stellungen, einmalig gelöst, danach nur noch
+3 Figuren ist das vollständig durchführbar – 399.112 legale Stellungen, einmalig gelöst, danach nur noch
 Tabellen-Nachschlag.
 
 ## Modell
@@ -30,16 +30,33 @@ sondern schlägt nach, wie eine echte Tablebase.
 
 ## Befunde (gemessen, keine Behauptungen)
 
-- **447.888 legale Stellungen** – exakt die Zahl, die auch öffentlich für das KTK-Endspiel dokumentiert ist
-  (siehe Quellen unten) – ein starkes externes Signal, dass die Zug-/Legalitätsregeln korrekt sind, ähnlich
-  der Berger-Tafeln oder bbpPairings in der Turnierplanung-Linie.
-- **425.644 Siege (95,0 %) für Weiß, 22.244 Remis (5,0 %).** Längster erzwungener Weg zum Matt: 50
-  Halbzüge (25 Züge) – nahe am öffentlich dokumentierten Rekord von 26 Zügen für dieses Endspiel.
-- **Eine naive Heuristik ("König heranführen, Turm ignorieren") wählt nur in 23,3 % der Fälle den
-  schnellsten Weg zum Matt** (gemessen an 2.000 zufälligen Gewinnstellungen). In 67,4 % der Fälle gewinnt
-  sie noch, aber langsamer. **In 9,4 % der Fälle verschenkt sie den bewiesenen Sieg komplett** (der Zug
+- **399.112 legale Stellungen, 376.868 Siege (94,4 %) für Weiß, 22.244 Remis (5,6 %).** Längster
+  erzwungener Weg zum Matt: 50 Halbzüge (25 Züge).
+- **Eine naive Heuristik ("König heranführen, Turm ignorieren") wählt nur in 24,4 % der Fälle den
+  schnellsten Weg zum Matt** (gemessen an 2.000 zufälligen Gewinnstellungen). In 69,7 % der Fälle gewinnt
+  sie noch, aber langsamer. **In 6,0 % der Fälle verschenkt sie den bewiesenen Sieg komplett** (der Zug
   führt in eine Remis-Stellung) – Königsabstand allein ist keine verlässliche Faustregel, der Turm muss
   aktiv mitgedacht werden.
+
+## Befunde und Korrekturen gegenüber dem Plan
+
+Zwei echte, vom Nutzer gefundene Bugs nach dem ersten Deploy:
+
+1. **Ungültige Stellungen zugelassen.** `is_legal_position` prüfte ursprünglich nur "Könige verschieden,
+   Turm nicht auf einem Königsfeld, Könige nicht benachbart" – NICHT aber die Grundregel, dass die Seite,
+   die NICHT am Zug ist, nicht bereits im Schach stehen darf (sie hätte ihren letzten Zug sonst illegal
+   ins Schach hinein gemacht). Der ursprüngliche „Lehrbuch-Start"-Preset zeigte genau das: Schwarz im
+   Schach vom Turm, obwohl Weiß am Zug war. Die (zunächst als externe Bestätigung gefeierte) exakte
+   Übereinstimmung der Gesamt-Stellungszahl mit der öffentlich dokumentierten Zahl 447.888 war dadurch
+   ein Zufallstreffer mit einer ANDEREN, loseren Zählkonvention – nach dem Fix sind es korrekt 399.112
+   legale Stellungen. Wichtig: der Fix ist rein SUBTRAKTIV – jeder Zug aus einer weiterhin legalen
+   Stellung führt nachweislich (`tests/test_claims.py::test_legal_positions_children_are_always_legal`)
+   nie in eine der jetzt ausgeschlossenen Stellungen, die exakten Matt-Abstände aller echten Stellungen
+   sind also unverändert richtig geblieben – nur die (vorher zu große) Gesamtzahl war falsch.
+2. **Figuren auf dem Brett kaum zu erkennen.** Reine Unicode-Schachsymbole (♔♖♚) ohne Hintergrundfarbe und
+   ohne Kontrastfarbe im Text unterschieden sich auf dem karierten Brett kaum. Fix: wie bei den
+   Connect4-Demos dieser Linie eine farbige Kreisscheibe je Figur (klarer Weiß/Schwarz-Kontrast) mit
+   einem fett beschrifteten Buchstaben (K/T) statt eines duennen Glyphs.
 
 ## Ehrliche Grenzen
 
@@ -48,9 +65,8 @@ sondern schlägt nach, wie eine echte Tablebase.
 - **Die Heuristik ist bewusst naiv**, um einen klaren Kontrast zu zeigen – reale KRK-Engines nutzen
   bessere Faustregeln (z. B. das Feld des schwarzen Königs systematisch verkleinern).
 - **Kein öffentlicher Referenzlöser zum direkten Abgleich jeder Einzelstellung verfügbar** – Korrektheit
-  über zwei unabhängige Wege abgesichert: von Hand nachgerechnete Matt-/Patt-Beispiele
-  (`tests/test_chess.py`) UND die exakte Übereinstimmung der Gesamt-Stellungszahl mit öffentlich
-  dokumentierten Werten.
+  über von Hand nachgerechnete Matt-/Patt-Beispiele abgesichert (`tests/test_chess.py`), nicht mehr über
+  einen (wie oben beschrieben irreführenden) Abgleich der Gesamtzahl.
 
 ## Tests
 
@@ -82,8 +98,10 @@ Heuristik, PDF-Export, Visualisierung, Streamlit-Rauchtests.
 ## Quellen
 
 - [Endgame tablebase – Wikipedia](https://en.wikipedia.org/wiki/Endgame_tablebase)
-- [The Endgames KRK and KQK](https://sites.google.com/site/jmptidcott2/KRK-KQK) (447.888 legale Stellungen,
-  längstes Matt 26 Züge)
+- [The Endgames KRK and KQK](https://sites.google.com/site/jmptidcott2/KRK-KQK) (nennt 447.888 legale
+  Stellungen und ein längstes Matt von 26 Zügen – die dortige Zählung schließt offenbar, anders als hier,
+  Stellungen mit ein, in denen die nicht am Zug befindliche Seite bereits im Schach steht; unser
+  längstes Matt von 25 Zügen liegt nahe an deren 26-Züge-Wert)
 
 ## Lokal ausführen
 

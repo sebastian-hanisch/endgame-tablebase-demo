@@ -43,8 +43,20 @@ def test_illegal_position_same_square():
 
 
 def test_legal_position_kings_far_apart():
-    pos = Position(sq("a", 1), sq("h", 1), sq("h", 8), WHITE)
+    # Turm auf d4 statt h1: h1 teilt sich die h-Linie mit dem schwarzen König
+    # auf h8 - das waere Schach, obwohl Weiss am Zug ist (unmoeglich, siehe
+    # test_side_not_to_move_in_check_is_illegal in test_claims.py).
+    pos = Position(sq("a", 1), sq("d", 4), sq("h", 8), WHITE)
     assert is_legal_position(pos)
+
+
+def test_side_not_to_move_cannot_be_in_check():
+    # Echter, vom User gefundener Bug: Schwarz im Schach, obwohl Weiss am Zug
+    # ist, ist unmoeglich - Schwarz haette seinen letzten Zug dann illegal ins
+    # Schach hinein gemacht.
+    pos = Position(sq("a", 1), sq("h", 1), sq("h", 8), WHITE)
+    assert is_check(pos)
+    assert not is_legal_position(pos)
 
 
 def test_open_position_has_many_legal_moves_and_is_not_terminal():
