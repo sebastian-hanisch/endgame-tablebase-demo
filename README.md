@@ -3,7 +3,7 @@
 Kind-Stück von **[evaluation-function-demo](https://github.com/sebastian-hanisch/evaluation-function-demo)**
 (Adversarische-Suche-Linie). **Vehikel-Wechsel**: statt Mini-Vier-Gewinnt diesmal ein echtes
 Schach-Endspiel – König und Turm gegen König (KTK), das klassische Beispiel für **Retrograde-Analyse**
-(Ken Thompsons erste vollständig berechnete Schach-Tablebase, 1986).
+(Ströhlein löste KTK 1970 per Retrograde-Analyse; Ken Thompson beschrieb das Verfahren 1986 für weitere Endspiele).
 
 ## Warum dieses Problem
 

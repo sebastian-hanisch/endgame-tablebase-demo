@@ -1,5 +1,5 @@
-"""König+Turm gegen König (KTK) - die klassische Tablebase-Stellung (Ken
-Thompsons erste vollständig berechnete Schach-Tablebase, 1986). Nur die für
+"""König+Turm gegen König (KTK) - die klassische Tablebase-Stellung (von
+Ströhlein 1970 per Retrograde-Analyse gelöst, bei Thompson 1986 beschrieben). Nur die für
 dieses eine Endspiel nötigen Schachregeln, nicht ein allgemeiner Schach-Engine.
 
 Felder sind Ganzzahlen 0-63 (rank*8+file, rank/file je 0-7 = Reihe 1-8/Linie

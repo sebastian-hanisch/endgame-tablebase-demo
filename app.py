@@ -34,8 +34,8 @@ st.title("♟️ Endspiel-Tablebase: König+Turm gegen König, vollständig gel�
 st.markdown(
     """
     **Vehikel-Wechsel:** statt Mini-Vier-Gewinnt diesmal ein echtes Schach-Endspiel – König und Turm gegen
-    König, das klassische Beispiel für **Retrograde-Analyse** (Ken Thompsons erste vollständig berechnete
-    Tablebase, 1986). Statt vorwärts zu suchen, wird **rückwärts von jeder Matt-/Patt-Stellung aus**
+    König, das klassische Beispiel für **Retrograde-Analyse** (Ströhlein löste KTK 1970 per
+    Retrograde-Analyse; Ken Thompson beschrieb das Verfahren 1986 für weitere Endspiele). Statt vorwärts zu suchen, wird **rückwärts von jeder Matt-/Patt-Stellung aus**
     propagiert, bis jede der 399.112 legalen Stellungen einen exakten Matt-Abstand hat – dieselbe
     Bellman-Rückwärtsrechnung wie in `value-iteration-demo` (Reinforcement-Learning-Linie), hier für ein
     Nullsummenspiel statt eines Erwartungswerts. Am Ende der Seite: die 📐 Mathematische Formulierung.
