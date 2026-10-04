@@ -139,9 +139,9 @@ st.plotly_chart(
             {
                 "type": "bar",
                 "x": ["Optimal (schnellstes Matt)", "Gewinnt noch, aber langsamer", "Verschenkt den Sieg (Remis!)"],
-                "y": [487, 1394, 119],
+                "y": [627, 1254, 119],
                 "marker": {"color": ["#2ca02c", "#ff7f0e", "#d62728"]},
-                "text": ["24,4 %", "69,7 %", "6,0 %"],
+                "text": ["31,4 %", "62,7 %", "6,0 %"],
                 "textposition": "outside",
             }
         ],
@@ -151,7 +151,7 @@ st.plotly_chart(
     key="heuristic_chart",
 )
 st.warning(
-    "**Ehrlicher Befund:** die Faustregel findet den schnellsten Weg nur in 24,4 % der Fälle - "
+    "**Ehrlicher Befund:** die Faustregel findet den schnellsten Weg nur in 31,4 % der Fälle - "
     "und in 6,0 % der Fälle verschenkt sie den bewiesenen Sieg komplett (der Zug führt in eine "
     "Remis-Stellung, weil der Turm dabei seine Kontrolle verliert). Königsabstand allein ist keine "
     "verlässliche Heuristik für dieses Endspiel - der Turm muss aktiv mitgedacht werden."
@@ -179,7 +179,7 @@ st.plotly_chart(dtm_histogram(hist), use_container_width=True, key="dtm_hist_cha
 st.info(
     f"Von {_de(C.TOTAL_POSITIONS)} legalen Stellungen sind {_de(C.TOTAL_WINS)} ({C.TOTAL_WINS / C.TOTAL_POSITIONS:.1%}) "
     f"ein bewiesener Sieg für Weiß, {_de(C.TOTAL_DRAWS)} ({C.TOTAL_DRAWS / C.TOTAL_POSITIONS:.1%}) ein Remis. "
-    f"Der längste erzwungene Weg zum Matt: {C.MAX_DTM_PLIES} Halbzüge."
+    f"Der längste erzwungene Weg zum Matt: {C.MAX_DTM_PLIES} Halbzüge (Schwarz am Zug); mit Weiß am Zug höchstens {C.MAX_DTM_PLIES - 1} Halbzüge, also Matt in 16 Zügen."
 )
 
 st.markdown("---")
@@ -200,7 +200,7 @@ st.markdown(
 with st.expander("📐 Mathematische Formulierung"):
     st.markdown(
         r"""
-        Retrograde-Analyse als Fixpunkt-Iteration (siehe `eg_retrograde.py`): für jede Stellung $s$ mit
+        Retrograde-Analyse ebenenweise (siehe `eg_retrograde.py`; Ebene $k$ = alle Stellungen mit DTM $k$): für jede Stellung $s$ mit
         Nachfolgern $s' \in \text{Züge}(s)$,
 
         $$
@@ -225,6 +225,6 @@ with st.expander("📐 Mathematische Formulierung"):
 st.markdown("---")
 st.caption(
     "Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – "
-    "Operations Research und Machine Learning. Interesse an einer maßgeschneiderten Lösung für "
-    "Ihr Unternehmen? [Kontakt aufnehmen](https://sebastianhanisch.net/kontakt.html)"
+    "Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). "
+    "Mehr zur Reihe: [Adversarische Suche: Minimax bis Selbstspiel](https://sebastianhanisch.net/konzepte-adversarische-suche.html)."
 )

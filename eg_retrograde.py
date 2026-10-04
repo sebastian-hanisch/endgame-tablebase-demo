@@ -1,8 +1,8 @@
 """Retrograde-Analyse: exakter Matt-Abstand (DTM) für JEDE legale
 König+Turm-gegen-König-Stellung.
 
-Implementiert als Fixpunkt-Iteration (wiederholte Sweeps über alle
-Stellungen, bis sich nichts mehr ändert) statt als klassische
+Implementiert ebenenweise (Sweep k setzt alle Stellungen mit DTM = k, bis
+keine neue Ebene mehr entsteht) statt als klassische
 Vorgänger-Graph-Suche (die Variante echter Tablebase-Generatoren, z. B. Ken
 Thompson 1986) - langsamer, aber strukturell identisch zur
 Bellman-Rückwärtsrechnung aus value-iteration-demo (Reinforcement-Learning-
@@ -66,37 +66,41 @@ def solve_tablebase(positions: list[Position] | None = None) -> dict[Position, O
             children_cache[pos] = legal_moves(pos)
             unresolved.append(pos)
 
-    changed = True
-    while changed:
-        changed = False
+    # Ebene für Ebene (Breitensuche rückwärts ab den Matt-Stellungen): Ebene k
+    # enthält genau die Stellungen mit DTM = k. Eine Weiß-Stellung hat DTM k,
+    # sobald ein Kind DTM k-1 hat (kein Kind mit kleinerem DTM, sonst wäre sie
+    # schon in einer früheren Ebene gelöst); eine Schwarz-Stellung, sobald ALLE
+    # Kinder Weiß-Siege sind und das größte Kind-DTM k-1 beträgt. Ein Sweep
+    # liest nur den Stand bis Ebene k-1 (kein In-place-Update innerhalb einer
+    # Ebene) - sonst bekäme eine Stellung schon in derselben Runde einen
+    # zu großen DTM, der nie mehr korrigiert wird.
+    level = 0
+    while unresolved:
+        level += 1
+        solved_now: list[tuple[Position, int]] = []
         still_unresolved = []
         for pos in unresolved:
             children = children_cache[pos]
             if pos.side_to_move == WHITE:
-                best = None
-                for c in children:
-                    co = outcome.get(c)
-                    if co is not None and co.result == WIN:
-                        if best is None or co.dtm < best:
-                            best = co.dtm
-                if best is not None:
-                    outcome[pos] = Outcome(WIN, best + 1)
-                    changed = True
+                if any((co := outcome.get(c)) is not None and co.result == WIN and co.dtm == level - 1 for c in children):
+                    solved_now.append((pos, level))
                     continue
             else:  # BLACK am Zug: Weiß gewinnt nur, wenn ALLE Antworten Weiß-Siege sind
                 dtms = []
-                all_win = True
                 for c in children:
                     co = outcome.get(c)
                     if co is None or co.result != WIN:
-                        all_win = False
                         break
                     dtms.append(co.dtm)
-                if all_win and dtms:
-                    outcome[pos] = Outcome(WIN, max(dtms) + 1)
-                    changed = True
-                    continue
+                else:
+                    if dtms and max(dtms) == level - 1:
+                        solved_now.append((pos, level))
+                        continue
             still_unresolved.append(pos)
+        if not solved_now:
+            break
+        for pos, dtm in solved_now:
+            outcome[pos] = Outcome(WIN, dtm)
         unresolved = still_unresolved
 
     # Alles, was nach dem Fixpunkt noch nicht klassifiziert ist, ist ein Remis

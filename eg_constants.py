@@ -18,4 +18,4 @@ HIGHLIGHT_SQUARE = "#7fb069"
 TOTAL_POSITIONS = 399_112
 TOTAL_WINS = 376_868
 TOTAL_DRAWS = 22_244
-MAX_DTM_PLIES = 50
+MAX_DTM_PLIES = 32  # Schwarz am Zug; mit Weiß am Zug 31 Halbzüge = Matt in 16 Zügen

@@ -21,8 +21,8 @@ Felder als Ganzzahlen 0–63. Weiß (König+Turm) versucht Matt zu setzen, Schwa
 
 ## Methodik
 
-Retrograde-Analyse als **Fixpunkt-Iteration** (`eg_retrograde.py`, wiederholte Sweeps bis keine Änderung
-mehr eintritt) statt als klassische Vorgänger-Graph-Suche (die schnellere Variante echter
+Retrograde-Analyse **ebenenweise** (`eg_retrograde.py`: Sweep *k* setzt alle Stellungen mit DTM = *k*,
+bis keine neue Ebene mehr entsteht) statt als klassische Vorgänger-Graph-Suche (die schnellere Variante echter
 Tablebase-Generatoren) – strukturell identisch zur Bellman-Rückwärtsrechnung aus `value-iteration-demo`
 (Reinforcement-Learning-Linie). Das Ergebnis wird einmalig berechnet und als kompakte Binärdatei
 (`eg_data/krk_tablebase.bin`, 1 MB, `tools/build_tablebase.py`) mitgeliefert – die App löst nichts live,
@@ -31,16 +31,18 @@ sondern schlägt nach, wie eine echte Tablebase.
 ## Befunde (gemessen, keine Behauptungen)
 
 - **399.112 legale Stellungen, 376.868 Siege (94,4 %) für Weiß, 22.244 Remis (5,6 %).** Längster
-  erzwungener Weg zum Matt: 50 Halbzüge (25 Züge).
-- **Eine naive Heuristik ("König heranführen, Turm ignorieren") wählt nur in 24,4 % der Fälle den
-  schnellsten Weg zum Matt** (gemessen an 2.000 zufälligen Gewinnstellungen). In 69,7 % der Fälle gewinnt
+  erzwungener Weg zum Matt: 32 Halbzüge (Schwarz am Zug); mit Weiß am Zug höchstens 31 Halbzüge, also
+  Matt in 16 Zügen.
+- **Eine naive Heuristik ("König heranführen, Turm ignorieren") wählt nur in 31,4 % der Fälle den
+  schnellsten Weg zum Matt** (gemessen an 2.000 zufälligen Gewinnstellungen). In 62,7 % der Fälle gewinnt
   sie noch, aber langsamer. **In 6,0 % der Fälle verschenkt sie den bewiesenen Sieg komplett** (der Zug
   führt in eine Remis-Stellung) – Königsabstand allein ist keine verlässliche Faustregel, der Turm muss
   aktiv mitgedacht werden.
 
 ## Befunde und Korrekturen gegenüber dem Plan
 
-Zwei echte, vom Nutzer gefundene Bugs nach dem ersten Deploy:
+Zwei echte, vom Nutzer gefundene Bugs nach dem ersten Deploy (plus ein dritter, bei einer späteren
+Nachprüfung gefundener, siehe Punkt 3):
 
 1. **Ungültige Stellungen zugelassen.** `is_legal_position` prüfte ursprünglich nur "Könige verschieden,
    Turm nicht auf einem Königsfeld, Könige nicht benachbart" – NICHT aber die Grundregel, dass die Seite,
@@ -57,6 +59,17 @@ Zwei echte, vom Nutzer gefundene Bugs nach dem ersten Deploy:
    ohne Kontrastfarbe im Text unterschieden sich auf dem karierten Brett kaum. Fix: wie bei den
    Connect4-Demos dieser Linie eine farbige Kreisscheibe je Figur (klarer Weiß/Schwarz-Kontrast) mit
    einem fett beschrifteten Buchstaben (K/T) statt eines duennen Glyphs.
+3. **Matt-Abstände (DTM) nicht minimal.** Die erste Fassung von `solve_tablebase` vergab die DTM im Sweep
+   in-place (Gauß-Seidel) und überarbeitete sie nie: die Gewinn-/Remismenge (376.868 / 22.244) war
+   richtig, aber 305.220 der 376.868 Matt-Abstände waren zu groß – angezeigt wurden bis zu 50 Halbzüge
+   (25 Züge) statt der tatsächlichen 32 Halbzüge (Matt in 16 Zügen mit Weiß am Zug, der bekannte
+   KRK-Wert). Behoben durch ebenenweise Retrograde-Analyse (Ebene *k* liest nur den Stand bis Ebene
+   *k*−1); die Tabelle wurde neu erzeugt und stimmt in allen 399.112 Stellungen mit einer unabhängig
+   geschriebenen Referenz überein (`tests/test_dtm_reference.py`). Dadurch änderten sich auch die
+   Heuristik-Messwerte (optimal: 31,4 % statt 24,4 %, langsamer: 62,7 % statt 69,7 %; Sieg verschenkt
+   unverändert 6,0 %) und der Lehrbuch-Start (Matt in 12 Zügen, 23 Halbzüge, statt 25 Halbzüge). Die
+   Aussage in Punkt 1, die exakten Matt-Abstände seien durch den Stellungs-Fix unverändert geblieben,
+   bezieht sich nur auf diesen Fix – die Werte selbst waren wegen Fehler 3 schon vorher zu groß.
 
 ## Ehrliche Grenzen
 
@@ -65,13 +78,15 @@ Zwei echte, vom Nutzer gefundene Bugs nach dem ersten Deploy:
 - **Die Heuristik ist bewusst naiv**, um einen klaren Kontrast zu zeigen – reale KRK-Engines nutzen
   bessere Faustregeln (z. B. das Feld des schwarzen Königs systematisch verkleinern).
 - **Kein öffentlicher Referenzlöser zum direkten Abgleich jeder Einzelstellung verfügbar** – Korrektheit
-  über von Hand nachgerechnete Matt-/Patt-Beispiele abgesichert (`tests/test_chess.py`), nicht mehr über
-  einen (wie oben beschrieben irreführenden) Abgleich der Gesamtzahl.
+  über von Hand nachgerechnete Matt-/Patt-Beispiele abgesichert (`tests/test_chess.py`) und über eine
+  unabhängig geschriebene Referenz (eigene Zugerzeugung, Vorgänger-Zähler statt Sweeps,
+  `tests/test_dtm_reference.py`), die für alle 399.112 Stellungen exakt dieselben DTM-Werte liefert.
 
 ## Tests
 
-46 Tests (`pytest tests/ -v`): Schachregeln (von Hand nachgerechnete Matt-/Patt-Stellungen, Turm-Fesselung,
-Deckung), Retrograde-Analyse (Fixpunkt-Propagation an kleinen Ausschnitten), Tablebase-Nachschlag,
+53 Tests (`pytest tests/ -v`): Schachregeln (von Hand nachgerechnete Matt-/Patt-Stellungen, Turm-Fesselung,
+Deckung), Retrograde-Analyse (Propagation an kleinen Ausschnitten, Abgleich aller DTM-Werte mit einer
+unabhängigen Referenz), Tablebase-Nachschlag,
 Heuristik, PDF-Export, Visualisierung, Streamlit-Rauchtests.
 
 ## Dateistruktur
@@ -81,7 +96,7 @@ Heuristik, PDF-Export, Visualisierung, Streamlit-Rauchtests.
 | `app.py` | Streamlit-Einstiegspunkt |
 | `eg_constants.py` | Farben, Pfade, gemessene Referenzwerte |
 | `eg_chess.py` | König+Turm-gegen-König-Regeln |
-| `eg_retrograde.py` | Retrograde-Analyse (Fixpunkt-Iteration) |
+| `eg_retrograde.py` | Retrograde-Analyse (ebenenweise) |
 | `eg_tablebase.py` | Lädt/schlägt die vorberechnete Tablebase nach |
 | `eg_evaluation.py` | Naive Heuristik, Verdikt-Texte |
 | `eg_visualization.py` | Plotly-Schachbrett und Diagramme |
@@ -92,7 +107,7 @@ Heuristik, PDF-Export, Visualisierung, Streamlit-Rauchtests.
 ## Bewusst nicht umgesetzt
 
 - Vorgänger-Graph-basierte Retrograde-Analyse (die schnellere Variante echter Tablebase-Generatoren) –
-  hier bewusst die langsamere, aber einfacher zu verifizierende Fixpunkt-Iteration.
+  hier bewusst die langsamere, aber einfacher zu verifizierende ebenenweise Sweep-Suche.
 - Weitere Endspiele (KQK, KPK, ...) – bewusst bei einem einzigen, klassischen Beispiel geblieben.
 
 ## Quellen
@@ -101,7 +116,8 @@ Heuristik, PDF-Export, Visualisierung, Streamlit-Rauchtests.
 - [The Endgames KRK and KQK](https://sites.google.com/site/jmptidcott2/KRK-KQK) (nennt 447.888 legale
   Stellungen und ein längstes Matt von 26 Zügen – die dortige Zählung schließt offenbar, anders als hier,
   Stellungen mit ein, in denen die nicht am Zug befindliche Seite bereits im Schach steht; unser
-  längstes Matt von 25 Zügen liegt nahe an deren 26-Züge-Wert)
+  unabhängig nachgerechnetes längstes Matt von 16 Zügen entspricht dem in der Literatur üblichen
+  KRK-Wert, den 26-Züge-Wert dieser Quelle konnten wir nicht nachvollziehen)
 
 ## Lokal ausführen
 
@@ -112,3 +128,7 @@ pytest tests/ -v
 ```
 
 Gebaut mit Streamlit, Plotly und fpdf2.
+
+---
+
+Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zur Reihe: [Adversarische Suche: Minimax bis Selbstspiel](https://sebastianhanisch.net/konzepte-adversarische-suche.html).

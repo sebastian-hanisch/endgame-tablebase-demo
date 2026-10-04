@@ -9,12 +9,12 @@ from eg_chess import BLACK, WHITE, Position, is_legal_position, square
 PRESETS = {
     "Rückrand-Matt (Weiß am Zug, 1 vor Matt)": {"wk": "c7", "wr": "h1", "bk": "a8", "stm": WHITE},
     "Lehrbuch-Start (weit weg, Weiß gewinnt)": {"wk": "a1", "wr": "d4", "bk": "h8", "stm": WHITE},
-    "Fast Patt-Falle (Schwarz am Zug)": {"wk": "c1", "wr": "b2", "bk": "a1", "stm": BLACK},
+    "Patt-Falle (Schwarz am Zug)": {"wk": "c1", "wr": "b2", "bk": "a1", "stm": BLACK},
 }
 PRESET_HELP = {
     "Rückrand-Matt (Weiß am Zug, 1 vor Matt)": "Turm h1-a1 setzt sofort matt - von Hand nachvollziehbar.",
-    "Lehrbuch-Start (weit weg, Weiß gewinnt)": "Königen und Turm in den Ecken - der Lehrbuch-Anfang.",
-    "Fast Patt-Falle (Schwarz am Zug)": "Echtes Patt-Beispiel - kein Matt, obwohl Schwarz keinen Zug mehr hat.",
+    "Lehrbuch-Start (weit weg, Weiß gewinnt)": "Die Könige in den Ecken, der Turm in der Mitte - der Lehrbuch-Anfang.",
+    "Patt-Falle (Schwarz am Zug)": "Echtes Patt-Beispiel - kein Matt, obwohl Schwarz keinen Zug mehr hat.",
 }
 
 _DEFAULT = PRESETS["Lehrbuch-Start (weit weg, Weiß gewinnt)"]

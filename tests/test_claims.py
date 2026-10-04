@@ -84,6 +84,6 @@ def test_readme_heuristic_agreement_rate():
                 worsened += 1
 
     assert len(sample) == 2000
-    assert optimal == 487
-    assert worsened == 1394
+    assert optimal == 627
+    assert worsened == 1254
     assert allowed_draw == 119
