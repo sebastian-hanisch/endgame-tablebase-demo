@@ -9,7 +9,7 @@ Schach-Endspiel – König und Turm gegen König (KTK), das klassische Beispiel 
 
 Bisher hat diese Linie immer VORWÄRTS gesucht (Minimax, Alpha-Beta, Bewertungsfunktion). Retrograde-Analyse
 dreht das um: ausgehend von jeder Matt-/Patt-Stellung wird der Wert **rückwärts** propagiert, bis jede
-erreichbare Stellung einen exakten Matt-Abstand (DTM, „distance to mate") hat. Für ein Endspiel mit nur
+erreichbare Stellung einen exakten Matt-Abstand (DTM, „distance to mate“) hat. Für ein Endspiel mit nur
 3 Figuren ist das vollständig durchführbar – 399.112 legale Stellungen, einmalig gelöst, danach nur noch
 Tabellen-Nachschlag.
 
@@ -47,7 +47,7 @@ Nachprüfung gefundener, siehe Punkt 3):
 1. **Ungültige Stellungen zugelassen.** `is_legal_position` prüfte ursprünglich nur "Könige verschieden,
    Turm nicht auf einem Königsfeld, Könige nicht benachbart" – NICHT aber die Grundregel, dass die Seite,
    die NICHT am Zug ist, nicht bereits im Schach stehen darf (sie hätte ihren letzten Zug sonst illegal
-   ins Schach hinein gemacht). Der ursprüngliche „Lehrbuch-Start"-Preset zeigte genau das: Schwarz im
+   ins Schach hinein gemacht). Der ursprüngliche „Lehrbuch-Start“-Preset zeigte genau das: Schwarz im
    Schach vom Turm, obwohl Weiß am Zug war. Die (zunächst als externe Bestätigung gefeierte) exakte
    Übereinstimmung der Gesamt-Stellungszahl mit der öffentlich dokumentierten Zahl 447.888 war dadurch
    ein Zufallstreffer mit einer ANDEREN, loseren Zählkonvention – nach dem Fix sind es korrekt 399.112
